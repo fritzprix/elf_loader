@@ -32,8 +32,5 @@ int main(void){
 
 
 static DECLARE_SECTION_HANDLER(sectionHandler){
-	switch(header->sh_type){
-
-	}
-	printf("%s\n",name);
+	//printf("Section Name : %s\n",name);
 }

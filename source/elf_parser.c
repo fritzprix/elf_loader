@@ -105,10 +105,29 @@ static void elf_prtElfHeader(ELF32Header* header){
 }
 
 static void elf_prtSecHeader(ELF32SectionHeader* sheader){
-	printf("==========       ELF32 Section    @   %10d  ==========\n",sheader->sh_offset);
-	printf("==========       Section Name      :  %10s  ==========\n",&elfImg.strs[sheader->sh_name]);
-	printf("==========       Section Base Addr :  %10d  ==========\n",sheader->sh_addr);
-	printf("==========       Section Size      :  %10d  ==========\n",sheader->sh_size);
+	printf("==========       ELF32 Section    @   %15d  ==========\n",sheader->sh_offset);
+	printf("==========       Section Name      :  %15s  ==========\n",&elfImg.strs[sheader->sh_name]);
+	printf("==========       Section Base Addr :  %15d  ==========\n",sheader->sh_addr);
+	printf("==========       Section Size      :  %15d  ==========\n",sheader->sh_size);
+	printf("==========       Section Attributes:  ");
+	if(sheader->sh_flags & SHF_ALLOC){
+		printf("ALLOC | ");
+	}
+	if(sheader->sh_flags & SHF_EXECINSTR){
+		printf("EXEC | ");
+	}
+	if(sheader->sh_flags & SHF_INFO_LINK){
+		printf("HAS_LNK | ");
+	}
+	if(sheader->sh_flags & SHF_LINK_ORDER){
+		printf("IS_ORDERED | ");
+	}
+	if(sheader->sh_flags & SHF_MERGE){
+		printf("Has MERGEABLE | ");
+	}
+	if(sheader->sh_flags & SHF_STRINGS){
+		printf("HAS_CSTR | ");
+	}
 }
 
 
