@@ -17,6 +17,29 @@
 #include "elf_types.h"
 
 
+const char* SHDR_TYPE_STRING[] = {
+		"SHT_NULL",
+		"SHT_PROGBITS",
+		"SHT_SYMTAB",
+		"SHT_STRTAB",
+		"SHT_STRRELA",
+		"SHT_HASH",
+		"SHT_DYNAMIC",
+		"SHT_NOTE",
+		"SHT_NOBITS",
+		"SHT_REL",
+		"SHT_SHLIB",
+		"SHT_DYNSYM",
+		"RESERVED",
+		"RESERVED",
+		"SHT_INIT_ARRAY",
+		"SHT_FINI_ARRAY",
+		"SHT_PREINIT_ARRAY",
+		"SHT_GROUP",
+		"SHT_SYMTAB_SHNDX",
+		"SHT_RESERVERD"
+};
+
 const uint8_t ELF_MAGIC[] = {
 		0x7F,
 		'E',
@@ -105,10 +128,15 @@ static void elf_prtElfHeader(ELF32Header* header){
 }
 
 static void elf_prtSecHeader(ELF32SectionHeader* sheader){
+	char* typestr = (char*) SHDR_TYPE_STRING[19];
 	printf("==========       ELF32 Section    @   %15d  ==========\n",sheader->sh_offset);
 	printf("==========       Section Name      :  %15s  ==========\n",&elfImg.strs[sheader->sh_name]);
 	printf("==========       Section Base Addr :  %15d  ==========\n",sheader->sh_addr);
 	printf("==========       Section Size      :  %15d  ==========\n",sheader->sh_size);
+	if(sheader->sh_type < sizeof(SHDR_TYPE_STRING))
+		typestr = (char*) SHDR_TYPE_STRING[sheader->sh_type];
+	printf("==========       Section Type      :  %15s  ==========\n",typestr);
+
 	printf("==========       Section Attributes:  ");
 	if(sheader->sh_flags & SHF_ALLOC){
 		printf("ALLOC | ");

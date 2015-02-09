@@ -32,5 +32,5 @@ int main(void){
 
 
 static DECLARE_SECTION_HANDLER(sectionHandler){
-	//printf("Section Name : %s\n",name);
+
 }
