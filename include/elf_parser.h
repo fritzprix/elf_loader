@@ -14,10 +14,12 @@
 typedef enum { TRUE = (1 > 0), FALSE = (1 < 0) } BOOL;
 #endif
 
-#define DECLARE_SECTION_HANDLER(fn)				void fn(const char* name,ELF32SectionHeader* header,void* img)
+#define DECLARE_SECTION_HANDLER(fn)				BOOL fn(const char* name,ELF32SectionHeader* header,void* img)
+#define DECLARE_SEGMENT_HANDLER(fn)             BOOL fn(ELF32ProgramHeader* phdr,void* segment)
 
 typedef struct {
-	void (*onHandleSection)(const char* sname,ELF32SectionHeader* header,void* img);
+	BOOL (*onHandleSection)(const char* sname,ELF32SectionHeader* header,void* img);
+	BOOL (*onHandleSegment)(ELF32ProgramHeader* phdr,void* segment);
 }ElfResolver;
 
 #if defined(__cplusplus)
@@ -31,7 +33,8 @@ typedef struct elf_handle_s {
 /**\brief initialize parser from elf file pointer
  *
  */
-extern BOOL parse(FILE* fp,const ElfResolver* resolver);
+extern elf_handle elfParse(const char* filename);
+extern void elfClose(elf_handle handle);
 
 
 

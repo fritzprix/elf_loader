@@ -15,18 +15,16 @@
 const char* file_name = "./raw/tachyos_app_VER0.0.elf";
 
 static DECLARE_SECTION_HANDLER(sectionHandler);
+static DECLARE_SEGMENT_HANDLER(segmentHandler);
+
 static ElfResolver resolver;
 
 int main(void){
 
 	resolver.onHandleSection = sectionHandler;
-	FILE* fp = fopen(file_name,"r");
-	if(!fp){
-		printf("File is not valid!!\n");
-		return -1;
-	}
-	parse(fp,&resolver);
-	fclose(fp);
+	resolver.onHandleSegment = segmentHandler;
+	elf_handle handle = elfParse(file_name);
+	elfClose(handle);
 	return 0;
 }
 
@@ -34,3 +32,8 @@ int main(void){
 static DECLARE_SECTION_HANDLER(sectionHandler){
 
 }
+
+static DECLARE_SEGMENT_HANDLER(segmentHandler){
+
+}
+

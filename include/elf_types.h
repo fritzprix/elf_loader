@@ -20,6 +20,15 @@ extern "C" {
 
 
 typedef struct {
+	uint32_t 	st_name;
+	uint32_t	st_val;
+	uint32_t	st_size;
+	uint8_t 	st_info;
+	uint8_t		st_other;
+	uint16_t	st_shndx;
+}ELF32SymbolEntry;
+
+typedef struct {
 	uint8_t		el_mag0;
 	uint8_t		el_mag1;
 	uint8_t		el_mag2;
@@ -47,7 +56,7 @@ typedef struct {
 	uint16_t	e_phnum;
 	uint16_t	e_shentsize;
 	uint16_t	e_shnum;
-	uint16_t	e_shstrndx;
+	uint16_t	e_shstrndx;    // index of name string table section
 }ELF32Header ;
 
 
@@ -65,6 +74,12 @@ typedef struct {
 #define SHF_MASKOS				((uint32_t) 0x0FF00000) 	///< os specific semantic
 #define SHF_MASKPROC			((uint32_t) 0xF0000000)		///< processor specific semantic
 
+#define SHT_NULL  				((uint32_t) 0) 				///< Null section
+#define SHT_PROGBITS			((uint32_t) 1)				///< program section
+#define SHT_SYMTAB				((uint32_t) 2)				///< symbol table section
+#define SHT_STRTAB				((uint32_t) 3)        		///< string table section
+#define SHT_RELA				((uint32_t) 4) 				///< relocation entries section
+
 
 typedef struct {
 	uint32_t	sh_name;
@@ -80,16 +95,27 @@ typedef struct {
 }ELF32SectionHeader;
 
 
-#define DT_NULL				((uint32_t) 0)
+typedef struct {
+	uint32_t 	p_type;
+	uint32_t	p_offset;
+	uint32_t	p_vaddr;
+	uint32_t	p_paddr;
+	uint32_t	p_filesz;
+	uint32_t	p_memsz;
+	uint32_t	p_flags;
+	uint32_t	p_align;
+}ELF32ProgramHeader;
+
+#define DT_NULL				((uint32_t) 0)	// meaning end of dynamic array
 #define DT_NEEDED			((uint32_t) 1)
 #define DT_PLTRELSZ			((uint32_t) 2)
 #define DT_PLTGOT			((uint32_t) 3)
-#define DT_HASH				((uint32_t) 4)
+#define DT_HASH				((uint32_t) 4)	//
 #define DT_STRTAB			((uint32_t) 5)
 #define DT_SYMTAB			((uint32_t) 6)
 #define DT_RELA				((uint32_t) 7)
 #define DT_RELASZ			((uint32_t) 8)
-#define DT_RELENT			((uint32_t) 9)
+#define DT_RELAENT			((uint32_t) 9)
 #define DT_STRSZ			((uint32_t)10)
 #define DT_SYMENT			((uint32_t)11)
 #define DT_INIT				((uint32_t)12)
