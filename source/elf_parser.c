@@ -57,8 +57,8 @@ typedef struct elf_image_s {
 	char* 				symstr;
 	ELF32SymbolEntry*	symTable;
 	void* 				entry;
-	uint32_t			imgsz;
-	uint32_t			laddr;
+	uint32_t			limgsz;
+	uint8_t*			limg;
 }* elf_image;
 
 typedef struct elf_handle_prototype_s {
@@ -66,6 +66,10 @@ typedef struct elf_handle_prototype_s {
 	struct elf_image_s	 elfImg;
 }* elf_handle_prototype;
 
+
+static void* elf_getEntry(elf_handle handle);
+static uint32_t elf_getLoadableSize(elf_handle handle);
+static uint32_t elf_getLoadable(elf_handle handle,uint8_t* img);
 
 static int elf_isValidElf(ELF32Header* header);
 static void elf_prtElfHeader(elf_image img);
@@ -129,30 +133,31 @@ elf_handle elfParse(const char* fname){
 	fread(elfImg->snstr,sizeof(uint8_t),shdr->sh_size,fp);
 
 	// iterate section header and bind required reference into elfimg object
-	uint32_t loadableImgSize = 0;
+	elfImg->limgsz = 0;
 	for(sidx = 0;sidx < elfImg->header.e_shnum;sidx++){
 		shdr = &((ELF32SectionHeader*) elfImg->shdrs)[sidx];
 		if((shdr->sh_flags & SHF_ALLOC) && (shdr->sh_size)){
-			loadableImgSize += shdr->sh_size;
+			elfImg->limgsz += shdr->sh_size;
 		}
 	}
 
-	printf("Loadable Image Size : %d \n",loadableImgSize);
-	uint8_t* loadable = (uint8_t*) malloc(loadableImgSize);
+	printf("Loadable Image Size : %d \n",elfImg->limgsz);
+	elfImg->limg = (uint8_t*) malloc(elfImg->limgsz);
 
 	for(sidx = 0;sidx < elfImg->header.e_shnum;sidx++){
 		shdr = &((ELF32SectionHeader*) elfImg->shdrs)[sidx];
 		char* sname = NULL;
 		if(shdr->sh_size){
-			if(shdr->sh_flags & SHF_ALLOC){
-
-			}else {
-				segment = malloc(shdr->sh_size);
-				fseek(fp,shdr->sh_offset,SEEK_SET);\
-				fread(segment,sizeof(uint8_t),shdr->sh_size,fp);
 #if defined(__DBG)
 				elf_prtSecHeader(elfImg,shdr);
 #endif
+			if(shdr->sh_flags & SHF_ALLOC){
+				fseek(fp,shdr->sh_offset,SEEK_SET);
+				fread(&elfImg->limg[shdr->sh_addr],1,shdr->sh_size,fp);
+			}else {
+				segment = malloc(shdr->sh_size);
+				fseek(fp,shdr->sh_offset,SEEK_SET);
+				fread(segment,sizeof(uint8_t),shdr->sh_size,fp);
 				sname = &elfImg->snstr[shdr->sh_name];
 				if(!onSectionHandle(ins,&elfImg->snstr[shdr->sh_name],shdr,segment)){
 					free(segment);
@@ -160,6 +165,7 @@ elf_handle elfParse(const char* fname){
 			}
 		}
 	}
+
 
 	// iterate program header and bind requried reference into elfimg object
 	for(;pidx < elfImg->header.e_phnum;pidx++){
@@ -174,6 +180,9 @@ elf_handle elfParse(const char* fname){
 			free(segment);
 	}
 	fclose(fp);
+	ins->_pix.getEntry = elf_getEntry;
+	ins->_pix.getLoadable = elf_getLoadable;
+	ins->_pix.getLoadableSize = elf_getLoadableSize;
 
 	return (elf_handle)ins;
 }
@@ -208,6 +217,7 @@ static void elf_prtSecHeader(elf_image img,ELF32SectionHeader* sheader){
 	printf("==========       Section Name      :  %15s  ==========\n",&img->snstr[sheader->sh_name]);
 	printf("==========       Section Base Addr :  %15d  ==========\n",sheader->sh_addr);
 	printf("==========       Section Size      :  %15d  ==========\n",sheader->sh_size);
+	printf("==========       Section align     :  %15d  ==========\n",sheader->sh_addralign);
 	if(sheader->sh_type < sizeof(SHDR_TYPE_STRING))
 		typestr = (char*) SHDR_TYPE_STRING[sheader->sh_type];
 	printf("==========       Section Type      :  %15s  ==========\n",typestr);
@@ -249,16 +259,15 @@ static void elf_prtPrgHeader(ELF32ProgramHeader* phdr){
 static BOOL onSectionHandle(elf_handle_prototype handle,const char* name,ELF32SectionHeader* header,void* img){
 	elf_handle_prototype hp = (elf_handle_prototype) handle;
 	uint32_t entCnt = 0,idx = 0;
-	if(header->sh_flags & SHF_ALLOC){
-
-		return TRUE;
-	}
 	if(!strcmp(name,".symtab")){
 		hp->elfImg.symTable = (ELF32SymbolEntry*) img;
+		printf("symtab : %d \n" ,img);
+		printf("Sym Entry Cnt : %d\n",header->sh_size / sizeof(ELF32SymbolEntry));
 		return TRUE;
 	}
 	if(!strcmp(name,".strtab")){
 		hp->elfImg.symstr = (char*) img;
+		printf("sym str : %d \n",img);
 		return TRUE;
 	}
 	return FALSE;
@@ -268,5 +277,26 @@ static BOOL onPgmHeaderHandle(elf_handle_prototype handle,ELF32ProgramHeader* ph
 
 }
 
+static void* elf_getEntry(elf_handle handle){
+	elf_handle_prototype ins = (elf_handle_prototype) handle;
+	if(!ins)
+		return NULL;
+	return (void*) ins->elfImg.header.e_entry;
+}
+
+static uint32_t elf_getLoadableSize(elf_handle handle){
+	elf_handle_prototype ins = (elf_handle_prototype) handle;
+	if(!ins)
+		return 0;
+	return ins->elfImg.limgsz;
+}
+
+static uint32_t elf_getLoadable(elf_handle handle,uint8_t* img){
+	elf_handle_prototype ins = (elf_handle_prototype) handle;
+	if(!ins)
+		return 0;
+	memcpy(img,ins->elfImg.limg,ins->elfImg.limgsz);
+	return ins->elfImg.limgsz;
+}
 
 

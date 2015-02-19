@@ -17,6 +17,8 @@ typedef enum { TRUE = (1 > 0), FALSE = (1 < 0) } BOOL;
 #define DECLARE_SECTION_HANDLER(fn)				BOOL fn(const char* name,ELF32SectionHeader* header,void* img)
 #define DECLARE_SEGMENT_HANDLER(fn)             BOOL fn(ELF32ProgramHeader* phdr,void* segment)
 
+typedef struct elf_handle_s* elf_handle;
+
 typedef struct {
 	BOOL (*onHandleSection)(const char* sname,ELF32SectionHeader* header,void* img);
 	BOOL (*onHandleSegment)(ELF32ProgramHeader* phdr,void* segment);
@@ -26,9 +28,11 @@ typedef struct {
 extern "C" {
 #endif
 
-typedef struct elf_handle_s {
-
-}* elf_handle;
+struct elf_handle_s {
+	void* (*getEntry)(elf_handle handle);
+	uint32_t (*getLoadableSize)(elf_handle handle);
+	uint32_t (*getLoadable)(elf_handle handle,uint8_t* img);
+};
 
 /**\brief initialize parser from elf file pointer
  *
