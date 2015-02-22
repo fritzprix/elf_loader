@@ -1,0 +1,14 @@
+
+*.o
+
+.settings/language.settings.xml
+
+.cproject
+
+.project
+
+*.bin
+
+appT.txt
+
+*.bin

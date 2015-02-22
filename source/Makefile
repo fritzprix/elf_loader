@@ -7,7 +7,8 @@ BASE_OBJ_DIR=$(BUILD_DIR)
 BASE_INC_DIR=$(ROOT_DIR)/include
 
 BASE_SRC=main.c\
-		elf_parser.c
+		elf_parser.c\
+		tch_imgbuilder.c
 
 BASE_OBJ=$(BASE_SRC:%.c=$(BASE_OBJ_DIR)/%.o)
 OBJS += $(BASE_OBJ)

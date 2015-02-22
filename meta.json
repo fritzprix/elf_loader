@@ -1,0 +1,9 @@
+{
+	"app_meta" : {
+		"name" : "hello world",
+		"vendor_specifier" : 1,
+		"app_specifier" : 1,
+		"major_ver" : 0,
+		"minor_ver" : 0
+	},
+}

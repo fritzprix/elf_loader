@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "elf_types.h"
 #include "elf_parser.h"
@@ -29,18 +30,12 @@ typedef struct tch_dynamic_bin_meta_struct{
 static void init_appMeta(tch_loadableInfo meta);
 
 
-static DECLARE_SECTION_HANDLER(sectionHandler);
-static DECLARE_SEGMENT_HANDLER(segmentHandler);
-
-static ElfResolver resolver;
 
 int main(void){
 
 	struct tch_dynamic_bin_meta_struct meta;
 	init_appMeta(&meta);
 
-	resolver.onHandleSection = sectionHandler;
-	resolver.onHandleSegment = segmentHandler;
 	elf_handle handle = elfParse(file_name);
 	meta.b_entry = (uint32_t)handle->getEntry(handle);
 	meta.b_sz = handle->getLoadableSize(handle);
@@ -56,19 +51,16 @@ int main(void){
 	uint32_t cnt = 0;
 	uint8_t* meta_b = (uint8_t*)&meta;
 	for(cnt = 0;cnt < sizeof(struct tch_dynamic_bin_meta_struct);cnt++){
-		char c;
-		itoa(meta_b[cnt],&c,16);
 		fputc('0',ascii);
 		fputc('x',ascii);
-		fputc(c,ascii);
+		fprintf(ascii,"%x",meta_b[cnt]);
 		fputc(',',ascii);
 	}
 	for(cnt = 0;cnt < meta.b_sz;cnt++){
-		char c;
-		itoa(exImg[cnt],&c,16);
+	//	itoa(exImg[cnt],&c,16);
 		fputc('0',ascii);
 		fputc('x',ascii);
-		fputc(c,ascii);
+		fprintf(ascii,"%x",exImg[cnt]);
 		fputc(',',ascii);
 	}
 	fclose(ascii);
@@ -78,13 +70,6 @@ int main(void){
 }
 
 
-static DECLARE_SECTION_HANDLER(sectionHandler){
-
-}
-
-static DECLARE_SEGMENT_HANDLER(segmentHandler){
-
-}
 
 static void init_appMeta(tch_loadableInfo meta){
 	memset(meta,0,sizeof(struct tch_dynamic_bin_meta_struct));

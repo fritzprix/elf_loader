@@ -79,9 +79,6 @@ static void elf_prtSecHeader(elf_image img,ELF32SectionHeader* sheader);
 static BOOL onSectionHandle(elf_handle_prototype handle,const char* sname,ELF32SectionHeader* header,void* img);
 static BOOL onPgmHeaderHandle(elf_handle_prototype handle,ELF32ProgramHeader* phdr,void* segment);
 
-static void onSymbolEntryFound(ELF32SymbolEntry* sym_entry);
-
-
 
 
 
