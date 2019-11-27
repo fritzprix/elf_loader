@@ -16,7 +16,7 @@ MK=mkdir
 ROOT_DIR = $(CURDIR)
 BUILD_DIR = $(ROOT_DIR)/$(BUILD)
 
-TARGET=$(BUILD_DIR)/parser.exe
+TARGET=$(BUILD_DIR)/elf_parser
 
 include $(ROOT_DIR)/source/Makefile
 
