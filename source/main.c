@@ -31,12 +31,12 @@ static void init_appMeta(tch_loadableInfo meta);
 
 
 
-int main(void){
+int main(int argc, const char* argv[]){
 
 	struct tch_dynamic_bin_meta_struct meta;
 	init_appMeta(&meta);
 
-	elf_handle handle = elfParse(file_name);
+	elf_handle handle = elfParse(argv[1]);
 	meta.b_entry = (uint32_t)handle->getEntry(handle);
 	meta.b_sz = handle->getLoadableSize(handle);
 	uint8_t* exImg = malloc(meta.b_sz);

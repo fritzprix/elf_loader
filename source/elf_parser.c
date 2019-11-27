@@ -122,6 +122,7 @@ elf_handle elfParse(const char* fname){
 	fseek(fp,elfImg->header.e_phoff,SEEK_SET);
 	fread(elfImg->phdrs,elfImg->header.e_phentsize,elfImg->header.e_phnum,fp);
 
+	printf("machine code : %d\n",elfImg->header.e_machine);
 	/// load string section
 	ELF32ProgramHeader* phdr = NULL;
 	ELF32SectionHeader* shdr = &((ELF32SectionHeader*) elfImg->shdrs)[elfImg->header.e_shstrndx];  // lookup section name string section
